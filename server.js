@@ -31,6 +31,23 @@ const db =  mongoose.connection
 
 db.once('open', () => {
     console.log('Conexão iniciada com sucesso')
+
+    const msgCollection = db.collection('messagecontents')
+    const changeStream = msgCollection.watch()
+
+    changeStream.on('change', (change) =>{
+        console.log(change)
+
+        if(change.operationType === 'insert') {
+            const messageDetails = change.fullDocument
+            pusher.trigger('messages', 'inserted',{
+                name: messageDetails.name,
+                message: messageDetails.message
+            })
+        }else{
+            console.log('É amigo kkkkkkkkkkkkkkkkkkkkkkkk')
+        }
+    })
 })
 
 //Rotas da API
