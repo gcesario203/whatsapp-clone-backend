@@ -3,6 +3,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 import Messages from './dbMessages.js'
 import Pusher from 'pusher'
+import cors from 'cors'
 
 //Configurações do backend
 const app = express()
@@ -19,6 +20,13 @@ const pusher = new Pusher({
 
 //Middlewares
 app.use(express.json())
+app.use(cors())
+
+app.use((req,res,next)=>{
+    res.setHeader('Access-Control-Allow-Origin', "*")
+    res.setHeader('Access-Control-Allow-Headers', "*")
+    next()
+})
 
 //Configurações de banco de dados
 mongoose.connect(connection_url,{
@@ -42,7 +50,9 @@ db.once('open', () => {
             const messageDetails = change.fullDocument
             pusher.trigger('messages', 'inserted',{
                 name: messageDetails.name,
-                message: messageDetails.message
+                message: messageDetails.message,
+                timestamp: messageDetails.timestamp,
+                received: messageDetails.received
             })
         }else{
             console.log('É amigo kkkkkkkkkkkkkkkkkkkkkkkk')
